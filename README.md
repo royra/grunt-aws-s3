@@ -21,7 +21,7 @@ If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out th
 Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
 
 ```js
-  grunt.loadNpmTasks('grunt-aws-s3');
+  grunt.loadNpmTasks('grunt-aws-s3-gzip');
 ```
 
 ## The "aws_s3" task

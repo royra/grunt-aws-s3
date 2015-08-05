@@ -171,6 +171,16 @@ If `options.gzip` is specified, files matching this pattern will not be compress
 { gzip: true, excludedFromGzip: ['*.png', '*.jpg', '*.jpeg'] }
 ```
 
+#### options.resultFilename
+Type: `String`
+
+Default: undefined
+
+If `options.resultFilename` is specified, JSON file with results of all operations will be created.
+For each action, an object will be added with `error` and `result` fields containing arrays with corresponding results and errors of operations. 
+
+This can be used to track which files were uploaded in case of differential upload by examining `need_upload` attribute of the file object.
+
 ### Actions
 
 This Grunt task supports three modes of interaction with S3, `upload`, `download` and `delete`. Every action that you specify is executed serially, one after the other. If multiple `upload` actions are one after the other, they will be grouped together.

@@ -42,6 +42,11 @@ module.exports = function (grunt) {
             excludedFromGzip: []
 		});
 
+		//If the role-base aws tokens are used the aws-sdk needs a sessionToken property to be
+		// set to work as expected.
+		if (process.env.AWS_SESSION_TOKEN) {
+			options.sessionToken = process.env.AWS_SESSION_TOKEN;
+		}
 		// To deprecate
 		if (options.concurrency !== undefined) {
 			grunt.log.writeln('The concurrency option is deprecated, use uploadConcurrency instead\n'.yellow);
@@ -49,12 +54,12 @@ module.exports = function (grunt) {
 		}
 
 		var filePairOptions = {
-			differential: options.differential, 
+			differential: options.differential,
 			stream: options.stream,
             gzip: options.gzip,
             excludedFromGzip: options.excludedFromGzip,
-			flipExclude: false, 
-			exclude: false 
+			flipExclude: false,
+			exclude: false
 		};
 
 		// Replace the AWS SDK by the mock package if we're testing
@@ -71,8 +76,8 @@ module.exports = function (grunt) {
 		// Checks that all params are in put_params
 		var isValidParams = function (params) {
 
-			return _.every(_.keys(params), function (key) { 
-				return _.contains(put_params, key); 
+			return _.every(_.keys(params), function (key) {
+				return _.contains(put_params, key);
 			});
 		};
 
@@ -82,7 +87,7 @@ module.exports = function (grunt) {
 			return s3.endpoint.href + options.bucket + '/' + file;
 		};
 
-		// Get the key URL relative to a path string 
+		// Get the key URL relative to a path string
 		var getRelativeKeyPath = function (key, dest) {
 
 			var path;
@@ -168,7 +173,7 @@ module.exports = function (grunt) {
 		};
 
 		var isFileDifferent = function (options, callback) {
-			
+
 			hashFile(options, function (err, md5_hash) {
 
 				if (err) {
@@ -209,6 +214,10 @@ module.exports = function (grunt) {
 			secretAccessKey: options.secretAccessKey
 		};
 
+		if (options.sessionToken) {
+			s3_options.sessionToken = options.sessionToken;
+		}
+
 		if (!options.region) {
 			grunt.log.writeln('No region defined. S3 will default to US Standard\n'.yellow);
 		} else {
@@ -231,7 +240,7 @@ module.exports = function (grunt) {
 		var objects = [];
 		var uploads = [];
 
-		// Because Grunt expands the files array automatically, 
+		// Because Grunt expands the files array automatically,
 		// we need to group the uploads together to make the difference between actions.
 		var pushUploads = function() {
 
@@ -259,7 +268,7 @@ module.exports = function (grunt) {
 				pushUploads();
 
 				filePair.dest = (filePair.dest === '/') ? '' : filePair.dest;
-				
+
 				objects.push(filePair);
 			}
 			else if (filePair.action === 'download') {
@@ -296,7 +305,7 @@ module.exports = function (grunt) {
 
 							if (_.last(filePair.dest) === '/') {
 								dest = (is_expanded) ? filePair.dest : unixifyPath(path.join(filePair.dest, src));
-							} 
+							}
 							else {
 								dest = filePair.dest;
 							}
@@ -306,7 +315,7 @@ module.exports = function (grunt) {
 
 								uploads.push(_.defaults({
 									need_upload: true,
-									src: src, 
+									src: src,
 									dest: dest
 								}, filePair));
 							}
@@ -320,11 +329,11 @@ module.exports = function (grunt) {
 
 		// Will list *all* the content of the bucket given in options
 		// Recursively requests the bucket with a marker if there's more than
-		// 1000 objects. Ensures uniqueness of keys in the returned list. 
+		// 1000 objects. Ensures uniqueness of keys in the returned list.
 		var listObjects = function (prefix, callback, marker, contents) {
 
 			var search = {
-				Prefix: prefix, 
+				Prefix: prefix,
 				Bucket: options.bucket
 			};
 
@@ -332,7 +341,7 @@ module.exports = function (grunt) {
 				search.Marker = marker;
 			}
 
-			s3.listObjects(search, function (err, list) { 
+			s3.listObjects(search, function (err, list) {
 
 				if (!err) {
 
@@ -506,12 +515,12 @@ module.exports = function (grunt) {
 
 							// If file exists locally we need to check if it's different
 							if (local_index !== -1) {
-								
+
 								// Check md5 and if file is older than server file
-								var check_options = { 
-									file_path: object.dest, 
-									server_hash: object.ETag, 
-									server_date: object.LastModified, 
+								var check_options = {
+									file_path: object.dest,
+									server_hash: object.ETag,
+									server_date: object.LastModified,
 									date_compare: 'older',
                                     gzip: object.gzip
 								};
@@ -778,7 +787,7 @@ module.exports = function (grunt) {
 					grunt.fatal('Download failed\n' + err.toString());
 				}
 				else {
-					if (res && res.length > 0) {                        
+					if (res && res.length > 0) {
 						grunt.log.writeln('\nList: (' + res.length.toString().cyan + ' objects):');
 
 						var task = this.data;
@@ -843,8 +852,8 @@ module.exports = function (grunt) {
 
 		if (process.platform === 'win32') {
 			return filepath.replace(/\\/g, '/');
-		} 
-		else {  
+		}
+		else {
 			return filepath;
 		}
 	};
